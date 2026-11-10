@@ -1,0 +1,1278 @@
+---
+title: "Summer Project Analysis 2026"
+output: pdf_document
+date: "2026-07-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+
+library(tidyverse)
+library(ggalluvial)
+
+data_with_names <- read.csv(
+  "munduruku_c10_any_anthro_return_to_original_lulc_cleaned.csv"
+)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+library(dplyr)
+
+df <- data_with_names
+
+
+
+names(df)
+event_table <- df |>
+  select(
+    longitude,
+    latitude,
+    pixel_x,
+    pixel_y,
+    pre_anthropogenic_class,
+    first_anthropogenic_class,
+    first_anthropogenic_year,
+    return_to_pre_anthropogenic_year,
+    years_until_return
+  )
+
+lulc_history <- df |>
+  select(
+    pixel_x,
+    pixel_y,
+    starts_with("land_cover_")
+  )
+```
+
+
+```{r}
+library(tidyr)
+library(stringr)
+
+lulc_long <- df |>
+  select(pixel_x, pixel_y, starts_with("land_cover_")) |>
+  pivot_longer(
+    cols = starts_with("land_cover_"),
+    names_to = "year",
+    values_to = "lulc_class"
+  ) |>
+  mutate(
+    year = as.integer(str_remove(year, "land_cover_"))
+  )
+```
+
+```{r}
+library(ggplot2)
+
+#Pie Charts for Land Cover in 1985
+
+
+land_cover_1985_summary <- df %>%
+  count(land_cover_1985) %>%
+  mutate(Percent = n / sum(n) * 100)
+
+ggplot(land_cover_1985_summary,
+       aes(x = "", y = Percent, fill = land_cover_1985)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  labs(
+    title = "Land Cover Distribution (1985)",
+    fill = "Land Cover"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(size = 10)
+  )
+
+
+
+land_cover_1995_summary <- df %>%
+  count(land_cover_1995) %>%
+  mutate(Percent = n / sum(n) * 100)
+
+ggplot(land_cover_1995_summary,
+       aes(x = "", y = Percent, fill = land_cover_1995)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  labs(
+    title = "Land Cover Distribution (1995)",
+    fill = "Land Cover"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(size = 10)
+  )
+
+
+
+
+land_cover_2005_summary <- df %>%
+  count(land_cover_2005) %>%
+  mutate(Percent = n / sum(n) * 100)
+
+ggplot(land_cover_2005_summary,
+       aes(x = "", y = Percent, fill = land_cover_2005)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  labs(
+    title = "Land Cover Distribution (2005)",
+    fill = "Land Cover"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(size = 10)
+  )
+
+
+
+land_cover_2015_summary <- df %>%
+  count(land_cover_2015) %>%
+  mutate(Percent = n / sum(n) * 100)
+
+ggplot(land_cover_2015_summary,
+       aes(x = "", y = Percent, fill = land_cover_2015)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  labs(
+    title = "Land Cover Distribution (2015)",
+    fill = "Land Cover"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(size = 10)
+  )
+
+
+
+
+
+land_cover_2024_summary <- df %>%
+  count(land_cover_2024) %>%
+  mutate(Percent = n / sum(n) * 100)
+
+ggplot(land_cover_2024_summary,
+       aes(x = "", y = Percent, fill = land_cover_2024)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  labs(
+    title = "Land Cover Distribution (2024)",
+    fill = "Land Cover"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(size = 10)
+  )
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(df, aes(x = forcats::fct_infreq(land_cover_1985))) +
+  geom_bar(fill = "forestgreen") +
+  coord_flip() +
+  labs(
+    title = "Land Cover Distribution (1985)",
+    x = "Land Cover Class",
+    y = "Pixels (30m x 30m)"
+  ) +
+  theme_minimal()
+
+
+
+ggplot(df, aes(x = forcats::fct_infreq(land_cover_1995))) +
+  geom_bar(fill = "orange") +
+  coord_flip() +
+  labs(
+    title = "Land Cover Distribution (1995)",
+    x = "Land Cover Class",
+    y = "Pixels (30m x 30m)"
+  ) +
+  theme_minimal()
+
+
+ggplot(df, aes(x = forcats::fct_infreq(land_cover_2005))) +
+  geom_bar(fill = "darkblue") +
+  coord_flip() +
+  labs(
+    title = "Land Cover Distribution (2005)",
+    x = "Land Cover Class",
+    y = "Pixels (30m x 30m)"
+  ) +
+  theme_minimal()
+
+
+ggplot(df, aes(x = forcats::fct_infreq(land_cover_2015))) +
+  geom_bar(fill = "pink") +
+  coord_flip() +
+  labs(
+    title = "Land Cover Distribution (2015)",
+    x = "Land Cover Class",
+    y = "Pixels (30m x 30m)"
+  ) +
+  theme_minimal()
+
+
+ggplot(df, aes(x = forcats::fct_infreq(land_cover_2024))) +
+  geom_bar(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Land Cover Distribution (2024)",
+    x = "Land Cover Class",
+    y = "Pixels (30m x 30m)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+library(ggplot2)
+
+mining_by_year <- df %>%
+  select(starts_with("land_cover_")) %>%
+  summarise(across(everything(), ~sum(. == "Mining", na.rm = TRUE))) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "Year",
+    values_to = "Mining_Pixels"
+  ) %>%
+  mutate(
+    Year = as.numeric(gsub("land_cover_", "", Year))
+  )
+
+ggplot(mining_by_year,
+       aes(x = Year, y = Mining_Pixels)) +
+  geom_line(color = "firebrick", linewidth = 1.3) +
+  geom_point(color = "firebrick", size = 2.5) +
+  scale_x_continuous(breaks = seq(1985, 2024, by = 5)) +
+  labs(
+    title = "Mining Pixels Through Time (1985–2024)",
+    x = "Year",
+    y = "Mining Pixels"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16)
+  )
+
+
+
+
+forest_pixels <- df %>%
+  filter(land_cover_1985 == "Forest Formation")
+
+# Count Mining pixels for each year
+forest_to_mining <- tibble(
+  Year = 1985:2024,
+  Mining_Pixels = sapply(1985:2024, function(y) {
+    sum(forest_pixels[[paste0("land_cover_", y)]] == "Mining",
+        na.rm = TRUE)
+  })
+)
+# Plot
+ggplot(forest_to_mining,
+       aes(x = Year, y = Mining_Pixels)) +
+  geom_col(fill = "firebrick", color = "black") +
+  scale_x_continuous(breaks = seq(1985, 2024, by = 5)) +
+  labs(
+    title = "Forest Formation Pixels Converted to Mining (1985–2024)",
+    x = "Year",
+    y = "Number of Mining Pixels"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16)
+  )
+
+
+
+
+
+forest_recovery <- df %>%
+  filter(
+    pre_anthropogenic_class == "Forest Formation",
+    first_anthropogenic_class == "Mining",
+    land_cover_2024 == "Forest Formation"
+  ) %>%
+  mutate(
+    recovery_time = return_to_pre_anthropogenic_year -
+                    first_anthropogenic_year
+  )
+
+ggplot(forest_recovery,
+       aes(x = recovery_time)) +
+  geom_histogram(
+    binwidth = 1,
+    fill = "forestgreen",
+    color = "black"
+  ) +
+  labs(
+    title = "Recovery Time of Forest Pixels After Mining",
+    x = "Years Until Return to Forest Formation",
+    y = "Number of Pixels"
+  ) +
+  theme_minimal()
+
+
+
+
+
+ggplot(forest_recovery,
+       aes(x = recovery_time)) +
+  geom_boxplot(
+    fill = "forestgreen",
+    color = "black",
+    outlier.color = "red"
+  ) +
+  labs(
+    title = "Recovery Time for Forest Pixels Remaining Forest in 2024",
+    y = "Years Until Recovery"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+
+
+
+summary(forest_recovery$recovery_time)
+
+mean(forest_recovery$recovery_time)
+
+median(forest_recovery$recovery_time)
+
+sd(forest_recovery$recovery_time)
+
+
+
+
+forest_recovery %>%
+  count(return_to_pre_anthropogenic_year) %>%
+  ggplot(aes(x = return_to_pre_anthropogenic_year,
+             y = n)) +
+  geom_col(fill = "forestgreen") +
+  labs(
+    title = "Forest Pixels Returning From Mining",
+    x = "Recovery Year",
+    y = "Recovered Pixels"
+  ) +
+  theme_minimal()
+```
+"Recovery Time of Forest Pixels After Mining"
+-How long did it take forest pixels that had successfully recovered and remained forest through 2024?
+-Same as "Years Required for Mining Pixels to Recover to Forest" plus the pixel must still be Forest Formation in 2024
+
+
+```{r}
+library(ggplot2)
+
+mining_recovery <- df %>%
+  filter(first_anthropogenic_class == "Mining",
+         pre_anthropogenic_class == "Forest Formation",
+         !is.na(return_to_pre_anthropogenic_year)) %>%
+  mutate(
+    recovery_time =
+      return_to_pre_anthropogenic_year -
+      first_anthropogenic_year
+  )
+
+ggplot(mining_recovery,
+       aes(x = recovery_time)) +
+  geom_histogram(binwidth = 1,
+                 fill = "forestgreen",
+                 color = "black") +
+  labs(
+    title = "Years Required for Mining Pixels to Recover to Forest",
+    x = "Years Until Recovery",
+    y = "Number of Pixels"
+  ) +
+  theme_minimal()
+
+
+
+
+
+ggplot(mining_recovery,
+       aes(x = recovery_time)) +
+  geom_boxplot(
+    fill = "forestgreen",
+    color = "black",
+    outlier.color = "red"
+  ) +
+  labs(
+    title = "Recovery Time for Mining Pixels Returning to Forest",
+    y = "Years Until Recovery"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+
+
+summary(mining_recovery$recovery_time)
+
+mean(mining_recovery$recovery_time)
+
+median(mining_recovery$recovery_time)
+
+sd(mining_recovery$recovery_time)
+
+
+
+
+
+recovery_by_year <- mining_recovery %>%
+  count(return_to_pre_anthropogenic_year)
+
+ggplot(recovery_by_year,
+       aes(x = return_to_pre_anthropogenic_year,
+           y = n)) +
+  geom_line(color = "darkgreen", linewidth = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Mining Pixels Returning to Forest Each Year",
+    x = "Year",
+    y = "Recovered Pixels"
+  ) +
+  theme_minimal()
+
+
+
+
+cumulative <- recovery_by_year %>%
+  arrange(return_to_pre_anthropogenic_year) %>%
+  mutate(cumulative_pixels = cumsum(n))
+
+ggplot(cumulative,
+       aes(x = return_to_pre_anthropogenic_year,
+           y = cumulative_pixels)) +
+  geom_line(color = "forestgreen",
+            linewidth = 1.5) +
+  labs(
+    title = "Cumulative Recovery of Mining Pixels",
+    x = "Year",
+    y = "Cumulative Pixels Recovered"
+  ) +
+  theme_minimal()
+
+
+
+
+
+total_pixels <- nrow(mining_recovery)
+
+recovery_percent <- mining_recovery %>%
+  count(return_to_pre_anthropogenic_year) %>%
+  arrange(return_to_pre_anthropogenic_year) %>%
+  mutate(
+    cumulative = cumsum(n),
+    percent = cumulative / total_pixels * 100
+  )
+
+ggplot(recovery_percent,
+       aes(x = return_to_pre_anthropogenic_year,
+           y = percent)) +
+  geom_line(color = "forestgreen",
+            linewidth = 1.4) +
+  geom_point(size = 2) +
+  labs(
+    title = "Percent of Mining Pixels Recovered to Forest",
+    x = "Year",
+    y = "Recovery (%)"
+  ) +
+  theme_minimal()
+```
+"Years Required for Mining Pixels to Recover to Forest"
+-How long did it take forest pixels that were first disturbed by mining to recover?
+-Only pixels whose first anthropogenic class was Mining, whose original land cover was Forest Formation, and that eventually recovered
+
+```{r}
+library(ggplot2)
+
+
+df2 <- df %>%
+  mutate(
+    recovery_time = return_to_pre_anthropogenic_year -
+                    first_anthropogenic_year
+  )
+
+# Remove pixels that never recovered
+recovered_pixels <- df2 %>%
+  filter(!is.na(recovery_time),
+         recovery_time >= 0)
+
+# Histogram
+ggplot(recovered_pixels,
+       aes(x = recovery_time)) +
+  geom_histogram(
+    binwidth = 1,
+    fill = "forestgreen",
+    color = "black"
+  ) +
+  labs(
+    title = "Time Required for Disturbed Pixels to Return to Their Original Land",
+    x = "Years Until Recovery",
+    y = "Number of Pixels"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 16
+    )
+  )
+
+
+
+
+ggplot(recovered_pixels,
+       aes(x = recovery_time)) +
+  geom_boxplot(
+    fill = "forestgreen",
+    color = "black",
+    outlier.color = "red"
+  ) +
+  labs(
+    title = "Recovery Time for All Recovered Pixels",
+    y = "Years Until Recovery"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+
+
+
+ggplot(data_with_names,
+       aes(x = years_until_return)) +
+  geom_histogram(
+    binwidth = 1,
+    fill = "yellow",
+    color = "black") +
+  labs(
+    title = "Years Until Return",
+    x = "Years Until Recovery",
+    y = "Number of Pixels"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 16
+    )
+  )
+
+
+
+summary(recovered_pixels$recovery_time)
+
+mean(recovered_pixels$recovery_time)
+
+median(recovered_pixels$recovery_time)
+
+sd(recovered_pixels$recovery_time)
+```
+"Time Required for Disturbed Pixels to Return to Their Original Land Cover"
+How long do all disturbed pixels take to return to their original land cover?
+Every pixel that has a valid recovery time, regardless of what land cover it started as or what anthropogenic class disturbed it
+
+
+```{r}
+library(ggplot2)
+
+
+recovery <- df %>%
+  filter(!is.na(return_to_pre_anthropogenic_year)) %>%
+  mutate(
+    recovery_time = return_to_pre_anthropogenic_year -
+      first_anthropogenic_year
+  ) %>%
+  filter(recovery_time >= 0)
+
+ggplot(recovery,
+       aes(x = recovery_time,
+           fill = first_anthropogenic_class)) +
+  geom_histogram(
+    binwidth = 1,
+    position = "identity",
+    alpha = 0.50,
+    color = "black"
+  ) +
+  labs(
+    title = "Recovery Time by Anthropogenic Land-Use Class",
+    x = "Years Until Recovery",
+    y = "Number of Pixels",
+    fill = "Anthropogenic Class"
+  ) +
+  theme_minimal()
+
+
+
+
+
+ggplot(recovery,
+       aes(x = recovery_time,
+           color = first_anthropogenic_class,
+           fill = first_anthropogenic_class)) +
+  geom_density(alpha = 0.25, linewidth = 1) +
+  labs(
+    title = "Distribution of Recovery Times by Anthropogenic Land-Use Class",
+    x = "Years Until Recovery",
+    y = "Density",
+    color = "Land-Use Class",
+    fill = "Land-Use Class"
+  ) +
+  theme_minimal()
+
+
+
+
+
+
+major_classes <- c(
+  "Mining",
+  "Pasture",
+  "Agriculture",
+  "Mosaic of Uses",
+  "Urban Area",
+  "Forest Plantation"
+)
+
+recovery_major <- recovery %>%
+  filter(first_anthropogenic_class %in% major_classes)
+
+ggplot(recovery_major,
+       aes(x = recovery_time,
+           color = first_anthropogenic_class,
+           fill = first_anthropogenic_class)) +
+  geom_density(alpha = 0.20, linewidth = 1.2) +
+  labs(
+    title = "Recovery Time Comparison Among Major Anthropogenic Classes",
+    x = "Years Until Return to Original Land Cover",
+    y = "Density",
+    color = "Land-Use Class",
+    fill = "Land-Use Class"
+  ) +
+  theme_minimal()
+
+
+
+
+
+
+
+
+
+
+# Prepare recovery data
+forest_recovery_all_classes <- df %>%
+  filter(
+    pre_anthropogenic_class == "Forest Formation",
+    !is.na(first_anthropogenic_class),
+    !is.na(first_anthropogenic_year),
+    !is.na(return_to_pre_anthropogenic_year)
+  ) %>%
+  mutate(
+    recovery_time = return_to_pre_anthropogenic_year -
+      first_anthropogenic_year
+  ) %>%
+  filter(
+    recovery_time >= 0,
+    return_to_pre_anthropogenic_year <= 2024
+  )
+
+# Check how many recovered pixels occur in each class
+forest_recovery_all_classes %>%
+  count(first_anthropogenic_class, sort = TRUE)
+
+ggplot(
+  forest_recovery_all_classes,
+  aes(x = recovery_time)
+) +
+  geom_histogram(
+    binwidth = 1,
+    boundary = 0,
+    closed = "left",
+    fill = "forestgreen",
+    color = "black"
+  ) +
+  facet_wrap(
+    ~ first_anthropogenic_class,
+    scales = "free_y"
+  ) +
+  scale_x_continuous(
+    breaks = seq(0, 40, by = 5)
+  ) +
+  labs(
+    title = "Recovery Time to Forest Formation by Anthropogenic Class",
+    subtitle = "Pixels that began as Forest Formation and returned by 2024",
+    x = "Years Until Return to Forest Formation",
+    y = "Number of Pixels"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 16
+    ),
+    plot.subtitle = element_text(
+      hjust = 0.5
+    ),
+    strip.text = element_text(
+      face = "bold",
+      size = 9
+    )
+  )
+```
+
+
+
+Presidential Change and Illegal Mining 
+
+https://news.mongabay.com/2019/12/brazil-on-the-precipice-from-environmental-leader-to-despoiler-2010-2020/?utm_source=chatgpt.com
+-Under Dilma Rousseff, who served as president from January 2011 until her removal from office in August 2016, economic development increasingly took priority over environmental and Indigenous protections. The government supported large infrastructure and energy projects, including dams, roads and other initiatives intended to stimulate economic growth.
+-Michel Temer became president after Rousseff’s impeachment in 2016. The article emphasizes his political reliance on the ruralista bloc, a powerful congressional coalition representing agribusiness, landowners and resource-development interests. Because Temer needed congressional support to remain in office amid corruption allegations, environmental and Indigenous protections became bargaining instruments. The article describes efforts to weaken conservation safeguards, reduce protected areas, hinder Indigenous territorial recognition and make land occupation or resource exploitation easier.
+-Jair Bolsonaro’s 2018 election as an acceleration and ideological transformation of earlier trends. Bolsonaro openly criticized environmental regulation, Indigenous territorial protections and restrictions on extracting resources from the Amazon. His administration placed officials sympathetic to agribusiness and extractive development in important positions, challenged the credibility of environmental monitoring and undermined agencies responsible for protecting forests and Indigenous territories. Bolsonaro also publicly advocated opening Indigenous lands to mining.
+
+In short:
+2011–2015: weakening protections under development-oriented policies;
+2016–2018: further institutional and legislative pressure under Temer;
+2019–2022: rapid intensification under Bolsonaro.
+
+
+```{r}
+library(tidyverse)
+library(ggalluvial)
+
+# Replace these labels with the exact anthropogenic class names
+# appearing in your dataset.
+anthropogenic_classes <- c(
+  "Pasture",
+  "Agriculture",
+  "Temporary Crop",
+  "Perennial Crop",
+  "Soybean",
+  "Rice",
+  "Other Temporary Crops",
+  "Coffee",
+  "Citrus",
+  "Other Perennial Crops",
+  "Forest Plantation",
+  "Mosaic of Uses",
+  "Urban Area",
+  "Mining",
+  "Aquaculture",
+  "Other Non Vegetated Area"
+)
+
+landcover_cols <- paste0("land_cover_", 1985:2024)
+
+# Convert annual columns from wide format to long format
+landcover_long <- data %>%
+  select(record_id, all_of(landcover_cols)) %>%
+  pivot_longer(
+    cols = all_of(landcover_cols),
+    names_to = "year",
+    values_to = "land_cover"
+  ) %>%
+  mutate(
+    year = as.integer(str_remove(year, "land_cover_")),
+
+    # Keep anthropogenic classes separate and combine everything else
+    plot_class = if_else(
+      land_cover %in% anthropogenic_classes,
+      land_cover,
+      "Natural / Other"
+    )
+  ) %>%
+  filter(!is.na(plot_class))
+
+
+
+landcover_transitions <- landcover_long %>%
+  arrange(record_id, year) %>%
+  group_by(record_id) %>%
+  mutate(
+    next_year  = lead(year),
+    next_class = lead(plot_class)
+  ) %>%
+  ungroup() %>%
+  filter(
+    !is.na(next_class),
+    next_year == year + 1
+  ) %>%
+  count(
+    year,
+    plot_class,
+    next_year,
+    next_class,
+    name = "pixel_count"
+  )
+
+
+ggplot(
+  landcover_transitions,
+  aes(
+    x = year,
+    xend = next_year,
+    stratum = plot_class,
+    alluvium = interaction(plot_class, next_class),
+    y = pixel_count,
+    fill = plot_class
+  )
+) +
+  geom_flow(
+    aes(
+      stratum = next_class,
+      alluvium = interaction(plot_class, next_class)
+    ),
+    alpha = 0.55,
+    color = NA,
+    width = 0.35
+  ) +
+  geom_stratum(
+    width = 0.35,
+    color = "grey30",
+    linewidth = 0.15
+  ) +
+  scale_x_continuous(
+    breaks = seq(1985, 2024, by = 5),
+    minor_breaks = 1985:2024
+  ) +
+  labs(
+    title = "Land-Cover Transitions Among Anthropogenic Classes",
+    subtitle = paste(
+      "Annual pixel transitions from 1985–2024;",
+      "non-anthropogenic classes grouped as Natural / Other"
+    ),
+    x = "Year",
+    y = "Number of pixels",
+    fill = "Land-cover class"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "right"
+  )
+```
+
+
+
+```{r}
+library(tidyverse)
+
+years <- 1985:2024
+landcover_cols <- paste0("land_cover_", years)
+
+recovery_comparison <- data %>%
+  rowwise() %>%
+  mutate(
+    ever_mining = any(
+      c_across(all_of(landcover_cols)) == "Mining",
+      na.rm = TRUE
+    ),
+
+    ever_pasture = any(
+      c_across(all_of(landcover_cols)) == "Pasture",
+      na.rm = TRUE
+    ),
+
+    disturbance_class = case_when(
+      ever_mining & !ever_pasture ~ "Mining",
+      ever_pasture & !ever_mining ~ "Pasture",
+      TRUE ~ NA_character_
+    ),
+
+    disturbance_year = {
+      classes <- c_across(all_of(landcover_cols))
+
+      target_class <- disturbance_class
+
+      if (is.na(target_class)) {
+        NA_integer_
+      } else {
+        disturbance_positions <- which(classes == target_class)
+
+        if (length(disturbance_positions) == 0) {
+          NA_integer_
+        } else {
+          years[min(disturbance_positions)]
+        }
+      }
+    },
+
+    return_to_forest_year = {
+      classes <- c_across(all_of(landcover_cols))
+
+      if (is.na(disturbance_year)) {
+        NA_integer_
+      } else {
+        disturbance_position <- which(years == disturbance_year)
+
+        # Years strictly after the first disturbance
+        later_positions <- seq(
+          disturbance_position + 1,
+          length(classes)
+        )
+
+        forest_positions <- later_positions[
+          classes[later_positions] == "Forest Formation"
+        ]
+
+        if (length(forest_positions) == 0) {
+          NA_integer_
+        } else {
+          years[min(forest_positions)]
+        }
+      }
+    }
+  ) %>%
+  ungroup() %>%
+  mutate(
+    recovery_time = return_to_forest_year - disturbance_year
+  ) %>%
+  filter(
+    pre_anthropogenic_class == "Forest Formation",
+    disturbance_class %in% c("Mining", "Pasture")
+  )
+
+
+recovery_comparison %>%
+  group_by(disturbance_class) %>%
+  summarise(
+    total_disturbed_pixels = n(),
+    recovered_pixels = sum(!is.na(recovery_time)),
+    unrecovered_pixels = sum(is.na(recovery_time)),
+    recovery_percentage = mean(!is.na(recovery_time)) * 100,
+    mean_recovery_time = mean(recovery_time, na.rm = TRUE),
+    median_recovery_time = median(recovery_time, na.rm = TRUE),
+    sd_recovery_time = sd(recovery_time, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+
+anova_data <- recovery_comparison %>%
+  filter(
+    !is.na(recovery_time),
+    recovery_time > 0
+  ) %>%
+  mutate(
+    disturbance_class = factor(
+      disturbance_class,
+      levels = c("Pasture", "Mining")
+    )
+  )
+
+
+anova_model <- aov(
+  recovery_time ~ disturbance_class,
+  data = anova_data
+)
+
+summary(anova_model)
+
+
+par(mfrow = c(1, 2))
+
+plot(
+  anova_model,
+  which = 1
+)
+
+plot(
+  anova_model,
+  which = 2
+)
+
+par(mfrow = c(1, 1))
+library(car)
+
+leveneTest(
+  recovery_time ~ disturbance_class,
+  data = anova_data
+)
+
+
+
+oneway.test(
+  recovery_time ~ disturbance_class,
+  data = anova_data,
+  var.equal = FALSE
+)
+
+t.test(
+  recovery_time ~ disturbance_class,
+  data = anova_data,
+  var.equal = FALSE
+)
+
+
+library(effectsize)
+
+eta_squared(
+  anova_model,
+  partial = FALSE
+)
+
+
+anova_data %>%
+  group_by(disturbance_class) %>%
+  summarise(
+    n = n(),
+    mean = mean(recovery_time),
+    median = median(recovery_time),
+    sd = sd(recovery_time),
+    .groups = "drop"
+  )
+
+
+
+
+
+chi_data <- recovery_comparison %>%
+  mutate(
+    recovery_status = if_else(
+      !is.na(return_to_forest_year),
+      "Recovered by 2024",
+      "Not recovered by 2024"
+    )
+  )
+
+
+recovery_table <- table(
+  chi_data$disturbance_class,
+  chi_data$recovery_status
+)
+
+recovery_table
+
+chi_result <- chisq.test(recovery_table)
+
+chi_result
+
+fisher.test(recovery_table)
+
+library(effectsize)
+
+cramers_v(recovery_table)
+
+prop.table(
+  recovery_table,
+  margin = 1
+) * 100
+
+
+
+chi_time_data <- anova_data %>%
+  mutate(
+    recovery_category = case_when(
+      recovery_time <= 5 ~ "1–5 years",
+      recovery_time <= 10 ~ "6–10 years",
+      recovery_time <= 20 ~ "11–20 years",
+      TRUE ~ "More than 20 years"
+    )
+  )
+
+recovery_time_table <- table(
+  chi_time_data$disturbance_class,
+  chi_time_data$recovery_category
+)
+
+recovery_time_table
+
+chi_time_result <- chisq.test(recovery_time_table)
+
+chi_time_result
+chi_time_result$expected
+
+
+
+
+ggplot(
+  anova_data,
+  aes(
+    x = disturbance_class,
+    y = recovery_time,
+    fill = disturbance_class
+  )
+) +
+  geom_violin(
+    alpha = 0.5,
+    trim = FALSE
+  ) +
+  geom_boxplot(
+    width = 0.18,
+    outlier.alpha = 0.15
+  ) +
+  labs(
+    title = "Forest Recovery Time Following Mining and Pasture",
+    x = "Anthropogenic disturbance",
+    y = "Years until return to Forest Formation",
+    fill = "Disturbance"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none"
+  )
+```
+
+```{r}
+library(tidyverse)
+
+
+years <- 1985:2024
+landcover_cols <- paste0("land_cover_", years)
+
+pasture_recovery <- data %>%
+  rowwise() %>%
+  mutate(
+    # First year the pixel became Pasture
+    first_pasture_year = {
+      classes <- c_across(all_of(landcover_cols))
+      pasture_positions <- which(classes == "Pasture")
+
+      if (length(pasture_positions) == 0) {
+        NA_integer_
+      } else {
+        years[min(pasture_positions)]
+      }
+    },
+
+    # First Forest Formation year after first becoming Pasture
+    return_to_forest_year = {
+      classes <- c_across(all_of(landcover_cols))
+      pasture_positions <- which(classes == "Pasture")
+
+      if (length(pasture_positions) == 0) {
+        NA_integer_
+      } else {
+        first_pasture_position <- min(pasture_positions)
+
+        later_positions <- seq.int(
+          from = first_pasture_position + 1,
+          to = length(classes)
+        )
+
+        forest_positions <- later_positions[
+          classes[later_positions] == "Forest Formation"
+        ]
+
+        if (length(forest_positions) == 0) {
+          NA_integer_
+        } else {
+          years[min(forest_positions)]
+        }
+      }
+    }
+  ) %>%
+  ungroup() %>%
+  mutate(
+    recovery_time = return_to_forest_year - first_pasture_year
+  ) %>%
+  filter(
+    pre_anthropogenic_class == "Forest Formation",
+    !is.na(first_pasture_year)
+  )
+
+
+pasture_recovery_by_year <- pasture_recovery %>%
+  filter(!is.na(return_to_forest_year)) %>%
+  count(
+    return_to_forest_year,
+    name = "pixels_recovered"
+  ) %>%
+  complete(
+    return_to_forest_year = 1985:2024,
+    fill = list(pixels_recovered = 0)
+  )
+
+
+ggplot(
+  pasture_recovery_by_year,
+  aes(
+    x = return_to_forest_year,
+    y = pixels_recovered
+  )
+) +
+  geom_col(
+    fill = "darkolivegreen3",
+    color = "black",
+    width = 0.85
+  ) +
+  scale_x_continuous(
+    breaks = seq(1985, 2025, by = 5)
+  ) +
+  labs(
+    title = "Annual Forest Recovery of Pasture-Disturbed Pixels",
+    subtitle = paste(
+      "First observed return to Forest Formation",
+      "after first classification as Pasture"
+    ),
+    x = "Year of return to Forest Formation",
+    y = "Number of pixels recovered"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    )
+  )
+```
+
+
+
+
+
+
+
+
+
